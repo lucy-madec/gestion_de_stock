@@ -1,7 +1,7 @@
 from database import Database
 
 def get_product_list(category_id=None):
-    db = Database("localhost", "root", "", "store")
+    db = Database("localhost", "root", "&Dance13008", "store")
     query = "SELECT * FROM product WHERE id_category = %s"
     params = (category_id,)
     result = db.fetch_all(query, params)

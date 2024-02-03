@@ -1,7 +1,7 @@
 from database import Database
 
 def get_category_id_by_name(category_name):
-    db = Database("localhost", "root", "", "store")
+    db = Database("localhost", "root", "&Dance13008", "store")
     query = "SELECT id FROM category WHERE name = %s"
     params = (category_name,)
     result = db.fetch_all(query, params)

@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from category import get_category_id_by_name
 from database import Database
 from product import get_product_list
@@ -118,16 +118,59 @@ labelPrix.pack(side=tk.LEFT, padx=5)
 entryPrix.pack(side=tk.LEFT, padx=5)
 buttonAjouter.pack(side=tk.LEFT, padx=5)
 
+# Fonction pour gérer la sélection d'un produit dans le Treeview
+def on_product_select(event):
+    global selected_product_id
+    selected_product_id = tree.focus() # Stocker l'ID du produit sélectionné
+    item = tree.item(selected_product_id)
+    values = item['values']
+    entryId.delete(0, tk.END)
+    entryId.insert(0, values[0])
+    entryProduit.delete(0, tk.END)
+    entryProduit.insert(0, values[1])
+    entryDescription.delete(0, tk.END)
+    entryDescription.insert(0, values[2])
+    entryPrix.delete(0, tk.END)
+    entryPrix.insert(0, values[3])
+    entryQuantite.delete(0, tk.END)
+    entryQuantite.insert(0, values[4])
+    buttonModifier.config(state=tk.NORMAL) # Activer le bouton Modifier
+
 # Fonction pour gérer la modification d'un produit
 def modifier_produit():
-    # Code pour modifier le produit sélectionné
-    pass
+    id = entryId.get()
+    produit = entryProduit.get()
+    description = entryDescription.get()
+    prix = entryPrix.get()
+    quantite = entryQuantite.get()
+
+    # Afficher une boîte de dialogue de confirmation
+    if messagebox.askyesno('Confirmation', 'Êtes-vous sûr de vouloir modifier ce produit ?'):
+        # Mettre à jour les détails du produit dans la base de données
+        db = Database("localhost", "root", "&Dance13008", "store")
+        query = "UPDATE product SET name = %s, description = %s, price = %s, quantity = %s WHERE id = %s"
+        params = (produit, description, prix, quantite, id)
+        db.query(query, params)
+        db.connexion.close()
+
+        # Mettre à jour les détails du produit dans le Treeview
+        tree.item(selected_product_id, values=(id, produit, description, prix, quantite))
+        buttonModifier.config(state=tk.DISABLED) # Désactiver le bouton Modifier
+        buttonMettreAJour.destroy() # Supprimer le bouton Mettre à jour
+    else:
+        # Annuler les modifications
+        buttonMettreAJour.destroy() # Supprimer le bouton Mettre à jour
 
 # Créer le bouton de modification
-buttonModifier = tk.Button(root, text="Modifier produit", command=modifier_produit)
-
-# Empaqueter le bouton de modification
+buttonModifier = tk.Button(root, text="Modifier produit", command=modifier_produit, state=tk.DISABLED)
 buttonModifier.place(x=850, y=70)
+
+# Créer le bouton Mettre à jour qui sera affiché après la modification
+buttonMettreAJour = tk.Button(root, text="Mettre à jour", command=modifier_produit, state=tk.DISABLED)
+buttonMettreAJour.place(x=850, y=110)
+
+# Créer le bouton Mettre à jour qui sera affiché après la modification
+buttonMettreAJour = tk.Button(root, text="Mettre à jour", command=modifier_produit, state=tk.DISABLED)
 
 def supprimer_produit():
     # Obtenir l'identifiant de l'élément sélectionné
@@ -157,6 +200,9 @@ def on_tree_select(event):
 
 # Lier la fonction on_tree_select à l'événement de sélection du tableau
 tree.bind("<FocusIn>", on_tree_select)
+
+# Lier la fonction on_product_select à l'événement de sélection du tableau
+tree.bind("<Double-1>", on_product_select)
 
 # Lier la fonction afficher_liste_produits à l'événement de sélection de la Combobox
 listeCombo.bind("<<ComboboxSelected>>", afficher_liste_produits)
