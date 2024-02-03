@@ -1,7 +1,10 @@
 from database import Database
 
-class Product:
-    # Connexion à la base de données
-    def __init__(self):
-        self.db = Database(host='localhost', user='root', password='', database='zoo')
-        
+def get_product_list():
+    db = Database("localhost", "root", "&Dance13008", "store")
+
+    # Requête pour récupérer la liste de produits
+    query = "SELECT * FROM product"
+    products = db.fetch_all(query)
+
+    return products
