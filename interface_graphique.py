@@ -1,20 +1,31 @@
 import tkinter as tk
 from tkinter import ttk
+from category import get_category_id_by_name
 from database import Database
 from product import get_product_list
 
 # Fonction pour récupérer et afficher la liste des produits dans le Treeview
-def afficher_liste_produits():
-    # Appeler la fonction pour obtenir la liste des produits depuis product.py
-    products = get_product_list()
+def afficher_liste_produits(event=None):
+    selected_category = listeCombo.get().strip()
 
-    # Effacer les éléments actuels dans le Treeview
-    for item in tree.get_children():
-        tree.delete(item)
+    # Utiliser la fonction get_category_id_by_name pour obtenir l'ID de la catégorie à partir de la base de données
+    category_id = get_category_id_by_name(selected_category)
 
-    # Ajouter les données dans le Treeview
-    for product in products:
-        tree.insert("", tk.END, values=product)
+    # Vérifier si l'ID de la catégorie est trouvé
+    if category_id is not None:
+
+        # Récupérer les produits de la catégorie correspondante
+        products = get_product_list(category_id)
+
+        # Effacer le tableau actuel
+        for item in tree.get_children():
+            tree.delete(item)
+
+        # Ajouter les produits dans le Treeview
+        for product in products:
+            tree.insert("", tk.END, values=product)
+    else:
+        pass
 
 # Création de la fenêtre principale
 root = tk.Tk() 
@@ -147,7 +158,7 @@ def on_tree_select(event):
 # Lier la fonction on_tree_select à l'événement de sélection du tableau
 tree.bind("<FocusIn>", on_tree_select)
 
-# Lier la fonction action au changement de sélection dans la Combobox
-listeCombo.bind("<<ComboboxSelected>>", action)
+# Lier la fonction afficher_liste_produits à l'événement de sélection de la Combobox
+listeCombo.bind("<<ComboboxSelected>>", afficher_liste_produits)
 
 root.mainloop()

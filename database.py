@@ -17,6 +17,6 @@ class Database:
 
     # Prendre les données de la base de données
     def fetch_all(self, query, params= None):
-        self.cursor.execute(query, params or ())
+        self.cursor.execute(query, params if params is not None else ())
         return self.cursor.fetchall()
     
