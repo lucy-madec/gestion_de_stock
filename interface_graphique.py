@@ -135,6 +135,7 @@ def on_product_select(event):
     entryQuantite.delete(0, tk.END)
     entryQuantite.insert(0, values[4])
     buttonModifier.config(state=tk.NORMAL) # Activer le bouton Modifier
+    entryId.config(state=tk.DISABLED)  # Désactiver le champ d'entrée Id
 
 # Fonction pour gérer la modification d'un produit
 def modifier_produit():
@@ -147,7 +148,7 @@ def modifier_produit():
     # Afficher une boîte de dialogue de confirmation
     if messagebox.askyesno('Confirmation', 'Êtes-vous sûr de vouloir modifier ce produit ?'):
         # Mettre à jour les détails du produit dans la base de données
-        db = Database("localhost", "root", "&Dance13008", "store")
+        db = Database("localhost", "root", "", "store")
         query = "UPDATE product SET name = %s, description = %s, price = %s, quantity = %s WHERE id = %s"
         params = (produit, description, prix, quantite, id)
         db.query(query, params)
@@ -157,9 +158,11 @@ def modifier_produit():
         tree.item(selected_product_id, values=(id, produit, description, prix, quantite))
         buttonModifier.config(state=tk.DISABLED) # Désactiver le bouton Modifier
         buttonMettreAJour.destroy() # Supprimer le bouton Mettre à jour
+        entryId.config(state=tk.NORMAL)  # Réactiver le champ d'entrée Id
     else:
         # Annuler les modifications
         buttonMettreAJour.destroy() # Supprimer le bouton Mettre à jour
+        entryId.config(state=tk.NORMAL)  # Réactiver le champ d'entrée Id
 
 # Créer le bouton de modification
 buttonModifier = tk.Button(root, text="Modifier produit", command=modifier_produit, state=tk.DISABLED)
