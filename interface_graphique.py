@@ -39,23 +39,47 @@ def action(event):
 
 def ajouter_produit():
     # Récupérer le nom du produit , la quantité, le prix et la description entrés par l'utilisateur
-    id = entryId.get()
     produit = entryProduit.get()
     description = entryDescription.get()
     quantite = entryQuantite.get()
     prix = entryPrix.get()
 
+    # Vérifier si les champs requis ne sont pas vides
+    if not produit or not description or not quantite or not prix:
+        messagebox.showerror("Erreur", "Veuillez remplir tous les champs.")
+        return
+
     # Quantité et prix
     try:
-        id = int(id)
         quantite = int(quantite)
         prix = int(prix)
     except ValueError:
-        print("La quantité et le prix doivent être des nombres.")
+        messagebox.showerror("Erreur", "La quantité et le prix doivent être des nombres.")
         return
+    
+    # Insérer le produit dans la base de données
+    db = Database("localhost", "root", "", "store")
+    query = "INSERT INTO product (name, description, price, quantity) VALUES (%s, %s, %s, %s)"
+    params = (produit, description, prix, quantite)
+    cursor = db.connexion.cursor()
+    cursor.execute(query, params)
+    db.connexion.commit()
+    product_id = cursor.lastrowid # Récupérer l'ID généré
 
     # Ajouter l'entrée au tableau
-    tree.insert("", tk.END, values=(id, produit, description, quantite, prix))
+    tree.insert("", tk.END, values=(product_id, produit, description, quantite, prix))
+
+    # Fermer la connexion à la base de données
+    db.connexion.close()
+
+    # Effacer les champs d'entrée après l'ajout
+    entryProduit.delete(0, tk.END)
+    entryDescription.delete(0, tk.END)
+    entryQuantite.delete(0, tk.END)
+    entryPrix.delete(0, tk.END)
+
+    # Afficher un message de succès
+    messagebox.showinfo("Succès", "Produit ajouté avec succès à la base de données.")
 
 # Widgets pour la sélection de catégorie
 labelChoix = tk.Label(root, text="Veuillez choisir une catégorie")
@@ -92,13 +116,11 @@ frame_boutons = tk.Frame(root)
 frame_boutons.pack(side=tk.RIGHT, padx=10)
 
 # Widgets pour l'ajout d'un produit
-entryId = tk.Entry(root, width=5)
 entryProduit = tk.Entry(root, width=20)
 entryDescription = tk.Entry(root, width=20)
 entryQuantite = tk.Entry(root, width=10)
 entryPrix = tk.Entry(root, width=10)
 
-labelId = tk.Label(root, text="Id:")
 labelProduit = tk.Label(root, text="Produit:")
 labelDescription = tk.Label(root, text="Description:")
 labelQuantite = tk.Label(root, text="Prix:")
@@ -106,8 +128,6 @@ labelPrix = tk.Label(root, text="Quantité:")
 
 buttonAjouter = tk.Button(root, text="Ajouter produit", command=ajouter_produit)
 
-labelId.pack(side=tk.LEFT, padx=5)
-entryId.pack(side=tk.LEFT, padx=5)
 labelProduit.pack(side=tk.LEFT, padx=5)
 entryProduit.pack(side=tk.LEFT, padx=5)
 labelDescription.pack(side=tk.LEFT, padx=5)
@@ -124,8 +144,6 @@ def on_product_select(event):
     selected_product_id = tree.focus() # Stocker l'ID du produit sélectionné
     item = tree.item(selected_product_id)
     values = item['values']
-    entryId.delete(0, tk.END)
-    entryId.insert(0, values[0])
     entryProduit.delete(0, tk.END)
     entryProduit.insert(0, values[1])
     entryDescription.delete(0, tk.END)
@@ -135,11 +153,9 @@ def on_product_select(event):
     entryQuantite.delete(0, tk.END)
     entryQuantite.insert(0, values[4])
     buttonModifier.config(state=tk.NORMAL) # Activer le bouton Modifier
-    entryId.config(state=tk.DISABLED)  # Désactiver le champ d'entrée Id
 
 # Fonction pour gérer la modification d'un produit
 def modifier_produit():
-    id = entryId.get()
     produit = entryProduit.get()
     description = entryDescription.get()
     prix = entryPrix.get()
@@ -158,11 +174,9 @@ def modifier_produit():
         tree.item(selected_product_id, values=(id, produit, description, prix, quantite))
         buttonModifier.config(state=tk.DISABLED) # Désactiver le bouton Modifier
         buttonMettreAJour.destroy() # Supprimer le bouton Mettre à jour
-        entryId.config(state=tk.NORMAL)  # Réactiver le champ d'entrée Id
     else:
         # Annuler les modifications
         buttonMettreAJour.destroy() # Supprimer le bouton Mettre à jour
-        entryId.config(state=tk.NORMAL)  # Réactiver le champ d'entrée Id
 
 # Créer le bouton de modification
 buttonModifier = tk.Button(root, text="Modifier produit", command=modifier_produit, state=tk.DISABLED)
