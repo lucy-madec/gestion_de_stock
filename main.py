@@ -121,7 +121,7 @@ labelDescription = tk.Label(root, text="Description:")
 labelQuantity = tk.Label(root, text="Prix:")
 labelPrice = tk.Label(root, text="Quantité:")
 
-buttonAdd = tk.Button(root, text="Ajouter Product", command=add_product)
+buttonAdd = tk.Button(root, text="Ajouter Produit", command=add_product)
 
 labelProduct.pack(side=tk.LEFT, padx=5)
 entryProduct.pack(side=tk.LEFT, padx=5)
@@ -186,7 +186,7 @@ buttonUpdate = tk.Button(root, text="Mettre à jour", command=set_product, state
 
 def delete_product():
     # Obtenir l'identifiant de l'élément sélectionné
-    select = tree.select()
+    select = tree.selection()
     if select:
         # Afficher une boîte de dialogue de confirmation
         if messagebox.askyesno("Confirmation", "Êtes-vous sûr de vouloir supprimer ce produit ?"):
@@ -206,7 +206,7 @@ buttonDelete.place(x=850, y=110)
 # Fonction pour gérer la visibilité du bouton de suppression
 def on_tree_select(event):
     # Vérifier si un élément est sélectionné
-    select = tree.select()
+    select = tree.selection()
     if select:
         # Activer le bouton si un élément est sélectionné
         buttonDelete.config(state=tk.NORMAL)
